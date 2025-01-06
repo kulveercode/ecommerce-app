@@ -87,8 +87,8 @@ app.post("/register", async (req, res) => {
       name,
       email,
       password,
-      verificationToken, 
-      verified: false, 
+      verificationToken,
+      verified: false,
     });
 
     //save the new user to the database
@@ -96,7 +96,9 @@ app.post("/register", async (req, res) => {
 
     //send verification email to the user
     await sendVerificationEmail(newUser.email, verificationToken);
-    res.status(200).json({ message: "Registration successful! Verify your email." });
+    res
+      .status(200)
+      .json({ message: "Registration successful! Verify your email." });
   } catch (error) {
     console.log("Error while registering user", error);
     res.status(500).json("Registration failed");
@@ -126,28 +128,64 @@ app.get("/verify/:token", async (req, res) => {
 const generateSecretKey = () => {
   const secretKey = crypto.randomBytes(32).toString("hex");
   return secretKey;
-}
+};
 const secretKey = generateSecretKey();
 
 //endpoint to login a user
-app.post("/login", async(req, res) => {
+app.post("/login", async (req, res) => {
   try {
-        const {email, password} = req.body;
-        //check if the user exists
-        const user = await User.findOne({email});
-        if(!user){
-          return res.status(401).json("Invalid email or password");
-        }
-        //check if the password is correct or not
-        if(user.password !== password){
-          return res.status(401).json("Invalid password");
-        }
-        
-        //generate a JWT token
-        const token = jwt.sign({userId:user._id}, secretKey);
-        // Send the token to the client
-        return res.status(200).json({ token });
+    const { email, password } = req.body;
+    //check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json("Invalid email or password");
+    }
+    //check if the password is correct or not
+    if (user.password !== password) {
+      return res.status(401).json("Invalid password");
+    }
+
+    //generate a JWT token
+    const token = jwt.sign({ userId: user._id }, secretKey);
+    // Send the token to the client
+    return res.status(200).json({ token });
   } catch (error) {
-    res.status(500).json({message:"Login failed"});
+    res.status(500).json({ message: "Login failed" });
   }
-})
+});
+
+//endpoint to store new address
+app.post("addresses", async (req, res) => {
+  try {
+    const { userId, address } = req.body;
+
+    //find the user by userid
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    //add the new address to the user's address array
+    user.addresses.push(address);
+    await user.save();
+
+    return res.status(200).json({ message: "New address added successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error adding new address" });
+  }
+});
+
+//endpoint to get all the addresses of a particular user
+app.get("/addresses/:user", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const addresses = user.addresses;
+    res.status(200).json({ addresses });
+  } catch (error) {
+    res.status(500).json({ message: "Error getting addresses" });
+  }
+});
