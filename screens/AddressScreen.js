@@ -1,14 +1,73 @@
-import { StyleSheet, Text, View, ScrollView } from "react-native";
-import React, { useState } from "react";
+import { StyleSheet, Text, View, ScrollView, Alert } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
 import { Pressable, TextInput } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+// import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+import { UserType } from "@/UserContext";
+import axios from "axios";
+import { useNavigation } from "expo-router";
 
 const AddressScreen = () => {
+  const navigation = useNavigation();
   const [name, setName] = useState("");
   const [mobileNo, setMobileNo] = useState("");
   const [houseNo, sethouseNo] = useState("");
   const [street, setStreet] = useState("");
   const [landmark, setLandmark] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const { userId, setUserId } = useContext(UserType);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        console.log("Token retrieved:", token);
+        if (token) {
+          const decodedToken = jwtDecode(token);
+          const userId = decodedToken.userId;
+          setUserId(userId);
+        } else {
+          console.log("No token found");
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    };
+    fetchUser();
+  }, [setUserId]);
+
+  const handleAddress = () => {
+    const address = {
+      name,
+      mobileNo,
+      houseNo,
+      street,
+      landmark,
+      postalCode,
+    };
+    // console.log("Sending request to:", "http://192.168.31.231:8000/addresses");
+    console.log("Data being sent:", { userId, address });
+    axios
+      .post("http://192.168.31.231:8000/addresses", { userId, address })
+      .then((response) => {
+        Alert.alert("Success", "Address added successfully");
+        setName("");
+        setMobileNo("");
+        sethouseNo("");
+        setStreet("");
+        setLandmark("");
+        setPostalCode("");
+
+        setTimeout(() => {
+          navigation.goBack();
+        }, 500);
+      })
+      .catch((error) => {
+        Alert.alert("Error", "Failed to add address");
+        console.log("error", error);
+      });
+  };
 
   return (
     <ScrollView>
@@ -131,6 +190,7 @@ const AddressScreen = () => {
           />
         </View>
         <Pressable
+          onPress={handleAddress}
           style={{
             backgroundColor: "#FFC72C",
             padding: 10,

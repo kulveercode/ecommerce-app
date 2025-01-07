@@ -155,7 +155,7 @@ app.post("/login", async (req, res) => {
 });
 
 //endpoint to store new address
-app.post("addresses", async (req, res) => {
+app.post("/addresses", async (req, res) => {
   try {
     const { userId, address } = req.body;
 

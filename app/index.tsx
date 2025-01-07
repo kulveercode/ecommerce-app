@@ -4,14 +4,17 @@ import { StyleSheet } from 'react-native';
 import { Provider } from'react-redux';
 import store from "../redux/store";
 import { ModalPortal } from "react-native-modals";
+import { UserContext } from "../UserContext";
 
 export default function Index() {
   return (
     <>
     <GestureHandlerRootView style={styles.container}>
       <Provider store={store}>
-        <StackNavigator />
-        <ModalPortal />
+        <UserContext>
+          <StackNavigator />
+          <ModalPortal />
+        </UserContext>
       </Provider>
         
     </GestureHandlerRootView>

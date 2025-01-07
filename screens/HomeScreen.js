@@ -11,7 +11,7 @@ import {
   Dimensions,
   Modal,
 } from "react-native";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -29,6 +29,8 @@ import { useNavigation } from "expo-router";
 import data from "../data/data.json";
 import { useSelector } from "react-redux";
 import { BottomModal, SlideAnimation, ModalContent } from "react-native-modals";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserType } from "@/UserContext";
 
 // This is the default configuration
 configureReanimatedLogger({
@@ -213,6 +215,10 @@ const HomeScreen = () => {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [modalVisible, setModalVisible] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState("");
+
+  const { userId, setUserId } = useContext(UserType);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -243,6 +249,46 @@ const HomeScreen = () => {
   const cart = useSelector((state) => state.cart.cart);
   console.log(cart);
 
+  //addresses
+  useEffect(() => {
+    if (userId) {
+      fetchAddresses();
+    }
+  }, [userId, modalVisible]);
+
+  const fetchAddresses = async () => {
+    // Fetch addresses from API
+    try {
+      const response = await axios.get(
+        `http://192.168.31.231:8000/addresses/${userId}`
+      );
+      const addresses = response.data;
+      setAddresses(addresses);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        console.log("Token retrieved:", token);
+        if (token) {
+          const decodedToken = jwtDecode(token);
+          const userId = decodedToken.userId;
+          setUserId(userId);
+        } else {
+          console.log("No token found");
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    };
+    fetchUser();
+  }, [setUserId]);
+
+  console.log("addresses:", addresses);
   return (
     <>
       <SafeAreaView
@@ -297,6 +343,11 @@ const HomeScreen = () => {
           >
             <Ionicons name="location-outline" size={24} color="black" />
             <Pressable>
+              {/* {selectedAddress ? (
+                <Text>Deliver to {selectedAddress?.name} - {selectedAddress?.street}</Text>
+              ) : (
+                <Text style={{fontSize:13, fontWeight:"500"}}>Add a Address</Text>
+              )} */}
               <Text style={{ fontSize: 13, fontWeight: "500" }}>
                 Deliver to Kulveer - Dehradun 248001
               </Text>
@@ -538,6 +589,45 @@ const HomeScreen = () => {
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {/* already added location  */}
+            <Pressable
+            // onPress={() => setSelectedAddress(item)}
+              style={{
+                width: 140,
+                height: 140,
+                borderColor: "#D0D0D0",
+                borderWidth: 1,
+                padding: 10,
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 3,
+                margin: 3,
+                marginRight: 13,
+                marginTop: 10,
+                // backgroundColor: selectedAddress === item ? "#FBCEB1" : "white"
+              }}
+            >
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                  Kulveer Singh
+                </Text>
+                <Entypo name="location-pin" size={24} color="red" />
+              </View>
+              <Text
+                numberOfLines={1}
+                style={{ width: 130, fontSize: 13, textAlign: "center" }}
+              >
+                #56, Near axis Bank, Clemin town, Dehradun
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={{ width: 130, fontSize: 13, textAlign: "center" }}
+              >
+                Uttarakhand, 248001
+              </Text>
+            </Pressable>
+
             <Pressable
               onPress={() => {
                 setModalVisible(false);
