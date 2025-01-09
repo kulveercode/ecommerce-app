@@ -247,7 +247,7 @@ const HomeScreen = () => {
   }, [selectedCategory, products]);
 
   const cart = useSelector((state) => state.cart.cart);
-  console.log(cart);
+  // console.log(cart);
 
   //addresses
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,7 +11,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation } from "expo-router";
+import { useFocusEffect, useNavigation } from "expo-router";
 import axios from "axios";
 import { UserType } from "@/UserContext";
 import { jwtDecode } from "jwt-decode";
@@ -38,6 +38,14 @@ const AddAdressScreen = () => {
       console.log("error", error);
     }
   };
+
+  //refresh addresses when the new addresses are added
+
+  // useFocusEffect(() => {
+  //   useCallback(() => {
+  //     fetchAddresses();
+  //   }, []);
+  // });
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -125,14 +133,21 @@ const AddAdressScreen = () => {
               Phone no - 9897969501
             </Text>
 
-            <View style={{flexDirection:"row", alignItems:"center", gap:10, marginTop:7}}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 10,
+                marginTop: 7,
+              }}
+            >
               <Pressable
                 style={{
                   borderColor: "#D0D0D0",
                   paddingHorizontal: 10,
                   borderRadius: 5,
-                  paddingVertical:6,
-                  borderWidth:0.9,
+                  paddingVertical: 6,
+                  borderWidth: 0.9,
                 }}
               >
                 <Text>Edit</Text>
@@ -142,8 +157,8 @@ const AddAdressScreen = () => {
                   borderColor: "#D0D0D0",
                   paddingHorizontal: 10,
                   borderRadius: 5,
-                  paddingVertical:6,
-                  borderWidth:0.9,
+                  paddingVertical: 6,
+                  borderWidth: 0.9,
                 }}
               >
                 <Text>remove</Text>
@@ -153,13 +168,12 @@ const AddAdressScreen = () => {
                   borderColor: "#D0D0D0",
                   paddingHorizontal: 10,
                   borderRadius: 5,
-                  paddingVertical:6,
-                  borderWidth:0.9,
+                  paddingVertical: 6,
+                  borderWidth: 0.9,
                 }}
               >
                 <Text>Set as Default</Text>
               </Pressable>
-             
             </View>
           </Pressable>
         </Pressable>
