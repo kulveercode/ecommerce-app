@@ -1,11 +1,21 @@
-import { StyleSheet, Text, View, ScrollView, Pressable } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  Pressable,
+  Alert,
+} from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { UserType } from "@/UserContext";
 import axios from "axios";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { cleanCart } from "@/redux/CartReducer";
+import { useNavigation } from "expo-router";
+import RazorpayCheckout from "react-native-razorpay";
 
 const ConfirmationScreen = () => {
   const steps = [
@@ -21,6 +31,10 @@ const ConfirmationScreen = () => {
   const [option, setOption] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("");
   const cart = useSelector((state) => state.cart.cart);
+
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+
   const total = cart
     ?.map((item) => item.price * item.quantity)
     .reduce((curr, prev) => curr + prev, 0);
@@ -43,6 +57,75 @@ const ConfirmationScreen = () => {
   };
   console.log(addresses);
 
+  const handlePlaceOrder = async () => {
+    try {
+      const orderData = {
+        userId: userId,
+        cartItems: cart,
+        totalPrice: total,
+        shippingAddress: selectedAddress,
+        paymentMethod: paymentMethod,
+      };
+
+      const response = await axios.post(
+        "http://192.168.31.231:8000/orders",
+        orderData
+      );
+      if (response.status === 200) {
+        dispatch({ type: "CLEAR_CART" });
+        navigation.navigate("Order");
+        dispatch(cleanCart());
+        console.log("order created successfully", response.data.order);
+      } else {
+        Alert.alert("Error", "Failed to place order");
+        console.log("error placing order", response.data.order);
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  //raozorpayment
+  const pay = async () => {
+    try {
+      const options = {
+        description: "Adding to wallet",
+        currency: "INR",
+        name: "ecommerce-app",
+        key: "rzp_test_pAWtWZnNC01evS",
+        amount: total * 100,
+        prefill: {
+          name: "ecommerce-app",
+          email: "kulveer.dev",
+          phone_number: "7017078186",
+        },
+        theme: { color: "#F37254" },
+      };
+      const data = await RazorpayCheckout.open(options);
+
+      const orderData = {
+        userId: userId,
+        cartItems: cart,
+        totalPrice: total,
+        shippingAddress: selectedAddress,
+        paymentMethod: card,
+      };
+
+      const response = await axios.post(
+        "http://192.168.31.231:8000/orders",
+        orderData
+      );
+      if (response.status === 200) {
+        dispatch({ type: "CLEAR_CART" });
+        navigation.navigate("Order");
+        dispatch(cleanCart());
+        console.log("order created successfully", response.data.order);
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   return (
     <ScrollView style={{ marginTop: 5 }}>
       <View style={{ flex: 1, paddingHorizontal: 20, paddingTop: 40 }}>
@@ -58,6 +141,7 @@ const ConfirmationScreen = () => {
             <View style={{ justifyContent: "center", alignItems: "center" }}>
               {index > 0 && (
                 <View
+                  key={index}
                   style={[
                     { flex: 1, height: 2, backgroundColor: "green" },
                     index <= currentStep && { backgroundColor: "green" },
@@ -312,7 +396,19 @@ const ConfirmationScreen = () => {
               <FontAwesome5 name="dot-circle" size={20} color="#008397" />
             ) : (
               <Entypo
-                onPress={() => setPaymentMethod(card)}
+                onPress={() => {
+                  setPaymentMethod(card);
+                  Alert.alert("UPI/Debit Card", "Pay Online", [
+                    {
+                      text: "Cancel",
+                      onPress: () => console.log("cancel is pressed"),
+                    },
+                    {
+                      text: " OK",
+                      onPress: () => pay(),
+                    },
+                  ]);
+                }}
                 name="circle"
                 size={20}
                 color="gray"
@@ -440,6 +536,7 @@ const ConfirmationScreen = () => {
           </View>
 
           <Pressable
+            onPress={handlePlaceOrder}
             style={{
               backgroundColor: "#FFC72C",
               padding: 10,

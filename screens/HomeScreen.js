@@ -232,7 +232,7 @@ const HomeScreen = () => {
     };
     fetchData();
   }, []);
-  console.log("products", products);
+  // console.log("products", products);
 
   //filter
   useEffect(() => {
@@ -293,7 +293,7 @@ const HomeScreen = () => {
     <>
       <SafeAreaView
         style={{
-          paddingTop: Platform.OS === "android" ? 0 : 0,
+          paddingTop: Platform.OS === "android" ? 20 : 0,
           flex: 1,
           backgroundColor: "white",
         }}
