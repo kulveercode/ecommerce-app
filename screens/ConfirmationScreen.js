@@ -49,13 +49,13 @@ const ConfirmationScreen = () => {
       const response = await axios.get(
         `http://192.168.31.231:8000/addresses/${userId}`
       );
-      const addresses = response.data;
+      const { addresses } = response.data;
       setAddresses(addresses);
     } catch (error) {
       console.log("error", error);
     }
   };
-  console.log(addresses);
+  // console.log(addresses);
 
   const handlePlaceOrder = async () => {
     try {
@@ -96,7 +96,7 @@ const ConfirmationScreen = () => {
         amount: total * 100,
         prefill: {
           name: "ecommerce-app",
-          email: "kulveer.dev",
+          email: "kulveer.dev@gmail.com",
           phone_number: "7017078186",
         },
         theme: { color: "#F37254" },
@@ -108,7 +108,7 @@ const ConfirmationScreen = () => {
         cartItems: cart,
         totalPrice: total,
         shippingAddress: selectedAddress,
-        paymentMethod: card,
+        paymentMethod: "card",
       };
 
       const response = await axios.post(
@@ -116,10 +116,12 @@ const ConfirmationScreen = () => {
         orderData
       );
       if (response.status === 200) {
-        dispatch({ type: "CLEAR_CART" });
         navigation.navigate("Order");
+        // dispatch({ type: "CLEAR_CART" });
         dispatch(cleanCart());
         console.log("order created successfully", response.data.order);
+      } else {
+        console.log("error creating order", response.data);
       }
     } catch (error) {
       console.log("error", error);
@@ -138,10 +140,9 @@ const ConfirmationScreen = () => {
           }}
         >
           {steps?.map((step, index) => (
-            <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <View key={index} style={{ justifyContent: "center", alignItems: "center" }}>
               {index > 0 && (
                 <View
-                  key={index}
                   style={[
                     { flex: 1, height: 2, backgroundColor: "green" },
                     index <= currentStep && { backgroundColor: "green" },
@@ -182,119 +183,129 @@ const ConfirmationScreen = () => {
           ))}
         </View>
       </View>
+      {/* step -  0 */}
       {currentStep == 0 && (
         <View style={{ marginHorizontal: 20 }}>
           <Text style={{ fontSize: 16, fontWeight: "bold" }}>
             Select Delivery Address
           </Text>
-          <Pressable>
-            <Pressable
-              style={{
-                borderWidth: 1,
-                borderColor: "#D0D0D0",
-                padding: 10,
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 5,
-                paddingBottom: 17,
-                marginVertical: 7,
-                borderRadius: 6,
-              }}
-            >
-              {selectedAddress && selectedAddress._id === item?._id ? (
-                <FontAwesome5 name="dot-circle" size={20} color="#008397" />
-              ) : (
-                <Entypo
-                  onPress={() => setSelectedAddress(item)}
-                  name="circle"
-                  size={20}
-                  color="gray"
-                />
-              )}
-              <View style={{ marginLeft: 6 }}>
-                <View
-                  style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
-                >
-                  <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-                    Kulveer Singh
-                  </Text>
-                  <Entypo name="location-pin" size={24} color="red" />
-                </View>
-                <Text style={{ fontSize: 15, color: "#181818" }}>
-                  #56, Near axis Bank
-                </Text>
-                <Text style={{ fontSize: 15, color: "#181818" }}>
-                  Clemin town, Dehradun
-                </Text>
-                <Text style={{ fontSize: 15, color: "#181818" }}>
-                  Uttarakhand, 248001
-                </Text>
-                <Text style={{ fontSize: 15, color: "#181818" }}>
-                  Phone no - 9897969501
-                </Text>
 
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 10,
-                    marginTop: 7,
-                  }}
-                >
-                  <Pressable
+          <Pressable>
+            {addresses?.map((item, index) => (
+              <Pressable
+                key={index}
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#D0D0D0",
+                  padding: 10,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 5,
+                  paddingBottom: 17,
+                  marginVertical: 7,
+                  borderRadius: 6,
+                }}
+              >
+                {selectedAddress && selectedAddress._id === item?._id ? (
+                  <FontAwesome5 name="dot-circle" size={20} color="#008397" />
+                ) : (
+                  <Entypo
+                    onPress={() => setSelectedAddress(item)}
+                    name="circle"
+                    size={20}
+                    color="gray"
+                  />
+                )}
+                <View style={{ marginLeft: 6 }}>
+                  <View
                     style={{
-                      borderColor: "#D0D0D0",
-                      paddingHorizontal: 10,
-                      borderRadius: 5,
-                      paddingVertical: 6,
-                      borderWidth: 0.9,
-                    }}
-                  >
-                    <Text>Edit</Text>
-                  </Pressable>
-                  <Pressable
-                    style={{
-                      borderColor: "#D0D0D0",
-                      paddingHorizontal: 10,
-                      borderRadius: 5,
-                      paddingVertical: 6,
-                      borderWidth: 0.9,
-                    }}
-                  >
-                    <Text>remove</Text>
-                  </Pressable>
-                  <Pressable
-                    style={{
-                      borderColor: "#D0D0D0",
-                      paddingHorizontal: 10,
-                      borderRadius: 5,
-                      paddingVertical: 6,
-                      borderWidth: 0.9,
-                    }}
-                  >
-                    <Text>Set as Default</Text>
-                  </Pressable>
-                </View>
-                <View>
-                  {/* {selectedAddress && selectedAddress._id === item?._id && ()} */}
-                  <Pressable
-                    onPress={() => setCurrentStep(1)}
-                    style={{
-                      backgroundColor: "#FFC72C",
-                      padding: 10,
-                      borderRadius: 20,
-                      justifyContent: "center",
+                      flexDirection: "row",
                       alignItems: "center",
-                      marginTop: 10,
+                      gap: 3,
                     }}
                   >
-                    <Text style={{ textAlign: "center" }}>
-                      Deliver to this address
+                    <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                      {item?.name}
                     </Text>
-                  </Pressable>
+                    <Entypo name="location-pin" size={24} color="red" />
+                  </View>
+                  <Text style={{ fontSize: 15, color: "#181818" }}>
+                    {item?.houseNo}, {item?.landmark}
+                  </Text>
+                  <Text style={{ fontSize: 15, color: "#181818" }}>
+                    {item?.street}
+                  </Text>
+                  <Text style={{ fontSize: 15, color: "#181818" }}>
+                    Phone no - {item?.mobileNo}
+                  </Text>
+                  <Text style={{ fontSize: 15, color: "#181818" }}>
+                    pin code : {item?.postalCode}
+                  </Text>
+
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 10,
+                      marginTop: 7,
+                    }}
+                  >
+                    <Pressable
+                      style={{
+                        borderColor: "#D0D0D0",
+                        paddingHorizontal: 10,
+                        borderRadius: 5,
+                        paddingVertical: 6,
+                        borderWidth: 0.9,
+                      }}
+                    >
+                      <Text>Edit</Text>
+                    </Pressable>
+                    <Pressable
+                      style={{
+                        borderColor: "#D0D0D0",
+                        paddingHorizontal: 10,
+                        borderRadius: 5,
+                        paddingVertical: 6,
+                        borderWidth: 0.9,
+                      }}
+                    >
+                      <Text>remove</Text>
+                    </Pressable>
+                    <Pressable
+                      style={{
+                        borderColor: "#D0D0D0",
+                        paddingHorizontal: 10,
+                        borderRadius: 5,
+                        paddingVertical: 6,
+                        borderWidth: 0.9,
+                      }}
+                    >
+                      <Text>Set as Default</Text>
+                    </Pressable>
+                  </View>
+                  <View>
+                    {selectedAddress && selectedAddress._id === item?._id && (
+                      <Pressable
+                        onPress={() => setCurrentStep(1)}
+                        style={{
+                          backgroundColor: "#FFC72C",
+                          padding: 10,
+                          borderRadius: 20,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          marginTop: 10,
+                        }}
+                      >
+                        <Text style={{ textAlign: "center" }}>
+                          Deliver to this address
+                        </Text>
+                      </Pressable>
+                    )}
+                  </View>
                 </View>
-              </View>
-            </Pressable>
+              </Pressable>
+            ))}
           </Pressable>
         </View>
       )}
@@ -356,6 +367,7 @@ const ConfirmationScreen = () => {
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>
             Select your Payment method
           </Text>
+          {/* cash */}
           <View
             style={{
               backgroundColor: "white",
@@ -372,7 +384,7 @@ const ConfirmationScreen = () => {
               <FontAwesome5 name="dot-circle" size={20} color="#008397" />
             ) : (
               <Entypo
-                onPress={() => setPaymentMethod(cash)}
+                onPress={() => setPaymentMethod("cash")}
                 name="circle"
                 size={20}
                 color="gray"
@@ -380,6 +392,7 @@ const ConfirmationScreen = () => {
             )}
             <Text>Cash on Delivery</Text>
           </View>
+          {/* card  */}
           <View
             style={{
               backgroundColor: "white",
@@ -397,15 +410,17 @@ const ConfirmationScreen = () => {
             ) : (
               <Entypo
                 onPress={() => {
-                  setPaymentMethod(card);
+                  setPaymentMethod("card");
                   Alert.alert("UPI/Debit Card", "Pay Online", [
                     {
                       text: "Cancel",
                       onPress: () => console.log("cancel is pressed"),
                     },
                     {
-                      text: " OK",
-                      onPress: () => pay(),
+                      text: "OK",
+                      onPress: () => {
+                        pay();
+                      },
                     },
                   ]);
                 }}
@@ -416,6 +431,7 @@ const ConfirmationScreen = () => {
             )}
             <Text>UPI / Credit or Debit Card</Text>
           </View>
+
           <Pressable
             onPress={() => setCurrentStep(3)}
             style={{
@@ -432,7 +448,7 @@ const ConfirmationScreen = () => {
         </View>
       )}
       {/* current step - 3 */}
-      {currentStep == 3 && (
+      {currentStep == 3 && paymentMethod === "cash" && (
         <View style={{ marginHorizontal: 20 }}>
           <Text style={{ fontSize: 20, fontWeight: "bold" }}>Order now</Text>
           <View
@@ -468,8 +484,7 @@ const ConfirmationScreen = () => {
               marginTop: 10,
             }}
           >
-            <Text>Shipping to Kulveer Singh</Text>
-            {/* <Text>Shipping to {selectedAddress?.name}</Text> */}
+            <Text>Shipping to {selectedAddress?.name}</Text>
             <View
               style={{
                 flexDirection: "row",

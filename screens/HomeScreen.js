@@ -262,12 +262,14 @@ const HomeScreen = () => {
       const response = await axios.get(
         `http://192.168.31.231:8000/addresses/${userId}`
       );
-      const addresses = response.data;
+      const { addresses } = response.data;
       setAddresses(addresses);
     } catch (error) {
       console.log("error", error);
     }
   };
+
+  // console.log(addresses);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -343,15 +345,20 @@ const HomeScreen = () => {
           >
             <Ionicons name="location-outline" size={24} color="black" />
             <Pressable>
-              {/* {selectedAddress ? (
-                <Text>Deliver to {selectedAddress?.name} - {selectedAddress?.street}</Text>
+              {selectedAddress ? (
+                <Text>
+                  Deliver to {selectedAddress?.name} - {selectedAddress?.street}
+                </Text>
               ) : (
-                <Text style={{fontSize:13, fontWeight:"500"}}>Add a Address</Text>
-              )} */}
-              <Text style={{ fontSize: 13, fontWeight: "500" }}>
+                <Text style={{ fontSize: 13, fontWeight: "500" }}>
+                  Add a Address
+                </Text>
+              )}
+              {/* <Text style={{ fontSize: 13, fontWeight: "500" }}>
                 Deliver to Kulveer - Dehradun 248001
-              </Text>
+              </Text> */}
             </Pressable>
+
             <MaterialIcons name="keyboard-arrow-down" size={24} color="black" />
           </Pressable>
           {/* List */}
@@ -589,44 +596,47 @@ const HomeScreen = () => {
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {/* already added location  */}
-            <Pressable
-            // onPress={() => setSelectedAddress(item)}
-              style={{
-                width: 140,
-                height: 140,
-                borderColor: "#D0D0D0",
-                borderWidth: 1,
-                padding: 10,
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 3,
-                margin: 3,
-                marginRight: 13,
-                marginTop: 10,
-                // backgroundColor: selectedAddress === item ? "#FBCEB1" : "white"
-              }}
-            >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+            {addresses?.map((item, index) => (
+              <Pressable
+                key={index}
+                onPress={() => setSelectedAddress(item)}
+                style={{
+                  width: 140,
+                  height: 140,
+                  borderColor: "#D0D0D0",
+                  borderWidth: 1,
+                  padding: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 3,
+                  margin: 3,
+                  marginRight: 13,
+                  marginTop: 10,
+                  backgroundColor: selectedAddress === item ? "#FBCEB1" : "white"
+                }}
               >
-                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-                  Kulveer Singh
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+                >
+                  <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                    {item?.name}
+                  </Text>
+                  <Entypo name="location-pin" size={24} color="red" />
+                </View>
+                <Text
+                  numberOfLines={1}
+                  style={{ width: 130, fontSize: 13, textAlign: "center" }}
+                >
+                  {item?.houseNo},{item?.landmark}
                 </Text>
-                <Entypo name="location-pin" size={24} color="red" />
-              </View>
-              <Text
-                numberOfLines={1}
-                style={{ width: 130, fontSize: 13, textAlign: "center" }}
-              >
-                #56, Near axis Bank, Clemin town, Dehradun
-              </Text>
-              <Text
-                numberOfLines={1}
-                style={{ width: 130, fontSize: 13, textAlign: "center" }}
-              >
-                Uttarakhand, 248001
-              </Text>
-            </Pressable>
+                <Text
+                  numberOfLines={1}
+                  style={{ width: 130, fontSize: 13, textAlign: "center" }}
+                >
+                  {item?.street}
+                </Text>
+              </Pressable>
+            ))}
 
             <Pressable
               onPress={() => {

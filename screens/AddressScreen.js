@@ -2,7 +2,6 @@ import { StyleSheet, Text, View, ScrollView, Alert } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { Pressable, TextInput } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// import jwt_decode from "jwt-decode";
 import { jwtDecode } from "jwt-decode";
 import { UserType } from "@/UserContext";
 import axios from "axios";
@@ -22,7 +21,7 @@ const AddressScreen = () => {
     const fetchUser = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        console.log("Token retrieved:", token);
+        // console.log("Token retrieved:", token);
         if (token) {
           const decodedToken = jwtDecode(token);
           const userId = decodedToken.userId;
@@ -47,7 +46,7 @@ const AddressScreen = () => {
       postalCode,
     };
     // console.log("Sending request to:", "http://192.168.31.231:8000/addresses");
-    console.log("Data being sent:", { userId, address });
+    // console.log("Data being sent:", { userId, address });
     axios
       .post("http://192.168.31.231:8000/addresses", { userId, address })
       .then((response) => {

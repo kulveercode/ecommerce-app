@@ -176,7 +176,7 @@ app.post("/addresses", async (req, res) => {
 });
 
 //endpoint to get all the addresses of a particular user
-app.get("/addresses/:user", async (req, res) => {
+app.get("/addresses/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
     const user = await User.findById(userId);
@@ -240,11 +240,11 @@ app.get("/profile/:userId", async (req, res) => {
 });
 
 //get the order
-app.get("/order/:orderId", async (req, res) => {
+app.get("/order/:userId", async (req, res) => {
   try {
     const orderId = req.params.userId;
     //find the order by orderId
-    const orders = await Order.findById({ user: userId }.populate("user"));
+    const orders = await Order.findById({ user:userId }.populate("user"));
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: "Order not found for this user" });
     }

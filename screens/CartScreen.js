@@ -22,11 +22,11 @@ const CartScreen = () => {
   const navigation = useNavigation();
   
   const cart = useSelector((state) => state.cart.cart);
-  console.log(cart);
+  // console.log(cart);
   const total = cart
     ?.map((item) => item.price * item.quantity)
     .reduce((curr, prev) => curr + prev, 0);
-  console.log("total", total);
+  // console.log("total", total);
 
   const dispatch = useDispatch();
 

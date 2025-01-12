@@ -14,17 +14,16 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useFocusEffect, useNavigation } from "expo-router";
 import axios from "axios";
 import { UserType } from "@/UserContext";
-import { jwtDecode } from "jwt-decode";
 
 const AddAdressScreen = () => {
   const navigation = useNavigation();
-  const [adresses, setAddresses] = useState([]);
+  const [addresses, setAddresses] = useState([]);
   const { userId, setUserId } = useContext(UserType);
   console.log("userId", userId);
 
   useEffect(() => {
     fetchAddresses();
-  });
+  }, []);
 
   const fetchAddresses = async () => {
     // Fetch addresses from API
@@ -32,20 +31,21 @@ const AddAdressScreen = () => {
       const response = await axios.get(
         `http://192.168.31.231:8000/addresses/${userId}`
       );
-      const addresses = response.data;
+      const { addresses } = response.data;
       setAddresses(addresses);
     } catch (error) {
       console.log("error", error);
     }
   };
 
-  //refresh addresses when the new addresses are added
+  // refresh addresses when the new addresses are added
+  useFocusEffect(
+    useCallback(() => {
+      fetchAddresses();
+    }, [])
+  );
 
-  // useFocusEffect(() => {
-  //   useCallback(() => {
-  //     fetchAddresses();
-  //   }, []);
-  // });
+  console.log("addresses", addresses);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false}>
@@ -102,80 +102,83 @@ const AddAdressScreen = () => {
         </Pressable>
         <Pressable>
           {/* all the stored addresses  */}
-          <Pressable
-            style={{
-              borderWidth: 1,
-              borderColor: "#D0D0D0",
-              padding: 10,
-              flexDirection: "column",
-              gap: 5,
-              marginVertical: 10,
-            }}
-          >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
-            >
-              <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-                Kulveer Singh
-              </Text>
-              <Entypo name="location-pin" size={24} color="red" />
-            </View>
-            <Text style={{ fontSize: 15, color: "#181818" }}>
-              #56, Near axis Bank
-            </Text>
-            <Text style={{ fontSize: 15, color: "#181818" }}>
-              Clemin town, Dehradun
-            </Text>
-            <Text style={{ fontSize: 15, color: "#181818" }}>
-              Uttarakhand, 248001
-            </Text>
-            <Text style={{ fontSize: 15, color: "#181818" }}>
-              Phone no - 9897969501
-            </Text>
-
-            <View
+          {addresses?.map((item, index) => (
+            <Pressable
+              key={index}
               style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 10,
-                marginTop: 7,
+                borderWidth: 1,
+                borderColor: "#D0D0D0",
+                padding: 10,
+                flexDirection: "column",
+                gap: 5,
+                marginVertical: 10,
               }}
             >
-              <Pressable
+              <View
+                style={{ flexDirection: "row", alignItems: "center", gap: 3 }}
+              >
+                <Text style={{ fontSize: 15, fontWeight: "bold" }}>
+                  {item?.name}
+                </Text>
+                <Entypo name="location-pin" size={24} color="red" />
+              </View>
+              <Text style={{ fontSize: 15, color: "#181818" }}>
+                {item?.houseNo}, {item?.landmark}
+              </Text>
+              <Text style={{ fontSize: 15, color: "#181818" }}>
+                {item?.street}
+              </Text>
+              <Text style={{ fontSize: 15, color: "#181818" }}>
+                Uttarakhand, {item?.postalCode}
+              </Text>
+              <Text style={{ fontSize: 15, color: "#181818" }}>
+                Phone no: {item?.mobileNo}
+              </Text>
+
+              <View
                 style={{
-                  borderColor: "#D0D0D0",
-                  paddingHorizontal: 10,
-                  borderRadius: 5,
-                  paddingVertical: 6,
-                  borderWidth: 0.9,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 10,
+                  marginTop: 7,
                 }}
               >
-                <Text>Edit</Text>
-              </Pressable>
-              <Pressable
-                style={{
-                  borderColor: "#D0D0D0",
-                  paddingHorizontal: 10,
-                  borderRadius: 5,
-                  paddingVertical: 6,
-                  borderWidth: 0.9,
-                }}
-              >
-                <Text>remove</Text>
-              </Pressable>
-              <Pressable
-                style={{
-                  borderColor: "#D0D0D0",
-                  paddingHorizontal: 10,
-                  borderRadius: 5,
-                  paddingVertical: 6,
-                  borderWidth: 0.9,
-                }}
-              >
-                <Text>Set as Default</Text>
-              </Pressable>
-            </View>
-          </Pressable>
+                <Pressable
+                  style={{
+                    borderColor: "#D0D0D0",
+                    paddingHorizontal: 10,
+                    borderRadius: 5,
+                    paddingVertical: 6,
+                    borderWidth: 0.9,
+                  }}
+                >
+                  <Text>Edit</Text>
+                </Pressable>
+                <Pressable
+                  style={{
+                    borderColor: "#D0D0D0",
+                    paddingHorizontal: 10,
+                    borderRadius: 5,
+                    paddingVertical: 6,
+                    borderWidth: 0.9,
+                  }}
+                >
+                  <Text>remove</Text>
+                </Pressable>
+                <Pressable
+                  style={{
+                    borderColor: "#D0D0D0",
+                    paddingHorizontal: 10,
+                    borderRadius: 5,
+                    paddingVertical: 6,
+                    borderWidth: 0.9,
+                  }}
+                >
+                  <Text>Set as Default</Text>
+                </Pressable>
+              </View>
+            </Pressable>
+          ))}
         </Pressable>
       </View>
     </ScrollView>
